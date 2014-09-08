@@ -1,0 +1,15 @@
+{
+{* File | Edit | Help}
+{
+  {/ Ticket | #Other tab }
+  {Ticket no: | "655321" | Date: | "2014-08-23" }
+  {#
+    Product | Quantity | Price
+    USB pen | 1 | 10 
+    DVD | 2 | 1 
+  }
+  {[New] | [Edit] | [Delete] }
+  {Total: | "12.00" }
+  {[Save] | [Cancel] }
+}
+}

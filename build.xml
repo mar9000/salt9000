@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ========================================================
+ * This file is part of the Salt9000 project.
+ * 
+ * Salt9000 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Salt9000 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with the Salt9000 project.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * Copyright 2014 Marco LOMBARDO, mar9000 near google.com .
+============================================================= -->
+<!-- ========================================================
+Build distribution jar salt.jar to be used from command line.
+============================================================= -->
+<project name="salt9000" default="dist" basedir=".">
+	<description>
+		Build distribution jar salt.jar to be used from command line.
+	</description>
+	
+	<property name="src.dir"        value="${basedir}/src"/>
+	<property name="lib.dir"        value="${basedir}/lib"/>
+	<property name="build.dir"      value="${basedir}/ant-build"/>
+	<property name="dist.dir"        value="${basedir}/dist"/>
+    <property name="jar.file"       value="${dist.dir}/salt9000.jar"/>
+    <property name="complete-jar.file"       value="${dist.dir}/salt9000-complete.jar"/>
+    <property name="main-class"     value="org.mar9000.salt.SaltCLI"/>
+
+	<path id="compile.classpath">
+		<pathelement location="${lib.dir}/antlr-runtime-4.4.jar"/>
+	</path>
+
+	<target name="check-environment" description="Create the build dir. for ant .">
+		<delete dir="${build.dir}"/>
+		<mkdir dir="${build.dir}"/>
+	</target>
+	
+	<target name="compile" depends="check-environment">
+		<javac srcdir="${src.dir}" destdir="${build.dir}">
+			<classpath refid="compile.classpath"/>
+	    </javac>
+	</target>
+	
+	<target name="dist" depends="compile">
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${build.dir}/lib"/>
+		<copy todir="${build.dir}/lib" flatten="true">
+			<path refid="compile.classpath"/>
+		</copy>
+		
+		<manifestclasspath property="manifest.classpath" jarfile="${jar.file}">
+			<classpath>
+				<pathelement location="."/>
+				<pathelement location="lib/antlr-runtime-4.4.jar"/>
+			</classpath>
+		</manifestclasspath>
+		
+		<jar destfile="${jar.file}" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}"/>
+				<attribute name="Class-Path" value="${manifest.classpath}"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="dist-complete" description="Add JGoodies LAF to let possible use the --jg-laf switch."
+            depends="dist">
+		
+		<copy todir="${build.dir}/lib" flatten="true">
+			<path refid="compile.classpath"/>
+		</copy>
+
+		<manifestclasspath property="manifest.complete-classpath" jarfile="${complete-jar.file}">
+			<classpath>
+				<pathelement location="."/>
+				<pathelement location="lib/antlr-runtime-4.4.jar"/>
+				<pathelement location="lib/jgoodies-common-1.8.0.jar"/>
+				<pathelement location="lib/jgoodies-looks-2.6.0.jar"/>
+			</classpath>
+		</manifestclasspath>
+		
+		<jar destfile="${complete-jar.file}" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}"/>
+				<attribute name="Class-Path" value="${manifest.complete-classpath}"/>
+			</manifest>
+		</jar>
+	</target>
+	
+</project>
