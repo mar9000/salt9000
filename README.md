@@ -1,7 +1,7 @@
 Salt9000
 ========
 
-Salt9000 is parser of the Salt language used by [PlantUML](plantuml.sourceforge.net) and a translator to PNG
+Salt9000 is parser of the Salt language used by [PlantUML](http://plantuml.sourceforge.net/) and a translator to PNG
 using real Swing widgets.
 
 ## Salt9000 - ANTLR parser for the Salt language
@@ -40,9 +40,9 @@ The following are still missing because this is the very first version and I don
 
 From here you can:
 
-  * run the test suite.
-  * run *grun Salt9000* launch configuration and visualize parsing result.
-  * run *SaltCLI* launch configuration and obtain the PNG file of the specified UI in `Salt9000.s9`.
+  * run the test suite: run the class `SaltTest` from eclipse as *JUnit test*.
+  * run *grun Salt9000* launch configuration and visualize parsing result on the console for the `examples/grun.s9` file.
+  * run *SaltCLI* launch configuration and obtain the PNG file of the UI specified in `Salt9000.s9`, the result is into `file-gen`.
   * generate examples from command line with `java -jar dist/salt9000.jar --output-dir file-gen examples/*.s9`
   * to use the JGoodies L&F switch (--jg-laf) you should use the complete distribution salt9000-complete.jar .
 
@@ -72,7 +72,7 @@ Probably the most complete example is examples/Salt9000.s9, where this:
 
 is translated to this image:
 
-![Salt9000 example](file-gen/Salt9000.png)
+![Salt9000 example](https://raw.githubusercontent.com/mar9000/salt9000/master/examples-png/Salt9000.png)
 
 ### Use Salt9000 as a stand-alone parser
 
@@ -102,11 +102,6 @@ Into the distribution you can find to jars:
 Run java -jar salt.jar to obtain the complete syntax.
 
 There is a launch configuration named *SaltCLI* that parses and translates the `examples/Salt9000.s9` file.
-
-### Developers
-
-I have included a launch configuration to regenerate lexer and parser from Salt.g4
-in case you want to experiment with changing the grammar. It's the *Compile Salt9000* launch configuration.
 
 ### Distribution
 
