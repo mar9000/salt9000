@@ -19,10 +19,8 @@
 package org.mar9000.salt.visitor;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Font;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -37,9 +35,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.border.EtchedBorder;
 
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -194,28 +192,25 @@ public class SaltSwingVisitor extends AbstractParseTreeVisitor<Container> implem
 		return returnPanel;
 	}
 
-	public static final Color SELECTED_TAB_BACKGROUND_COLOR = new Color(192, 192, 192);
 	@Override
-	public JPanel visitTabBar(TabBarContext ctx) {
-		JPanel tabBar = defaultResult();
-		//tabBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
+	public JTabbedPane visitTabBar(TabBarContext ctx) {
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+		//
 		Iterator<TabContext> iter = ctx.tab().iterator();
+		int index = -1;
 		while (iter.hasNext()) {
+			// Vertical box layout to allocate group rows.
+			JPanel p = new JPanel();
+			p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 			TabContext tabContext = iter.next();
-			JLabel tabLabel = new JLabel(tabContext.text().getText());
-			tabLabel.setOpaque(true);
+			tabbedPane.addTab(tabContext.text().getText(), p);
+			index++;
 			if (tabContext.SELECTED_TAB() != null) {
-				tabLabel.setBackground(SELECTED_TAB_BACKGROUND_COLOR);
-				tabLabel.setFont(tabLabel.getFont().deriveFont(Font.BOLD));
-				tabLabel.setBorder(new EtchedBorder(EtchedBorder.RAISED));
-				tabLabel.setOpaque(true);
-			} else {
-				tabLabel.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
+				tabbedPane.setSelectedIndex(index);
 			}
-			tabBar.add(tabLabel);
 		}
 		//
-		return tabBar;
+		return tabbedPane;
 	}
 	
 	// Not used.
