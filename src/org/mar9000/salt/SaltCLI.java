@@ -18,41 +18,27 @@
  */
 package org.mar9000.salt;
 
-import java.awt.Container;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.mar9000.salt.grammar.SaltLexer;
-import org.mar9000.salt.grammar.SaltParser;
-import org.mar9000.salt.visitor.SaltSwingVisitor;
-
+/**
+ * Command line interface to Salt9000.
+ * @author mar9000
+ */
 public class SaltCLI {
-
-	private static ParseTree tree = null;
+	
+	/** The list of the file names to process.   */
 	private static ArrayList<String> inputFilenames = new ArrayList<String>();
+	/** The output dir. received as parameter.   */
 	private static File outputDirParameter = null;
-	private static String JGOODIES_PLASTIC_LOOKANDFEEL = "com.jgoodies.looks.plastic.PlasticXPLookAndFeel"; 
+	/** An optional Look&Feel to use.   */
 	private static String lookAndFeelClass = null;
 	
+	/** Main method.   */
 	public static void main(String[] args) {
+		// Read parameters.
 		loadArguments(args);
+		// Error?
 		if (inputFilenames.size() == 0) {
 			System.out.println("Usage: java -jar salt9000.jar <options> <input files>");
 			System.out.println("  options:");
@@ -62,7 +48,6 @@ public class SaltCLI {
 			System.exit(0);
 		}
 		// Process all specified filenames.
-		toBeCompleted = inputFilenames.size();
 		for (int f = 0; f < inputFilenames.size(); f++) {
 			File inputFile = new File(inputFilenames.get(f));
 			if (inputFile.isDirectory()) {
@@ -70,63 +55,43 @@ public class SaltCLI {
 				continue;
 			}
 			System.out.println("Processing file " + inputFilenames.get(f) + " ...");
-			SaltCLI salt = new SaltCLI(inputFile, outputDirParameter);
-			salt.processFile();
+			SaltProcessor salt = new SaltProcessor(inputFile);
+			if (lookAndFeelClass != null)
+				salt.setLookAndFeel(lookAndFeelClass);
+			String outputFileName = getOutputFileName(inputFile);
+			salt.dumpImage(outputFileName);
 		}
+		if (exitAfterRender)
+			System.exit(0);
 	}
 	
-	private File inputFile = null;
-	private File outputDir = null;
-	private SaltCLI(File inputFile, File outputDir) {
-		this.inputFile = inputFile;
-		this.outputDir = outputDir;
-	}
-	
-	private static int toBeCompleted = 0;
-	private void processFile() {
-		// Parse input file.
-		String inputFileContent = null;
-		try {
-			inputFileContent = readFileAsString(inputFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Enable to open file: " + inputFile);
-			return;
-		}
-		ANTLRInputStream input = new ANTLRInputStream(inputFileContent);
-		SaltLexer lexer = new SaltLexer(input);
-		lexer.addErrorListener(new BaseErrorListener() {
-			@Override
-			public void syntaxError(Recognizer<?, ?> arg0, Object arg1, int arg2,
-					int arg3, String arg4, RecognitionException arg5) {
-				throw new RuntimeException(arg5);
-			}
-		});
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		SaltParser parser = new SaltParser(tokens);
-		tree = parser.document();
-		if (parser.getNumberOfSyntaxErrors() > 0) {
-			System.out.println("Syntax error in file " + inputFile);
-			return;
-		}
-		// Calculate output dir.
-		if (outputDir == null) {
-			outputDir = new File(inputFile.getParent());
-		}
+	/** Calculate the output filename for a specific input file.   */
+	private static String getOutputFileName(File input) {
+		String outputDirName = null;
+		String outputFileName = null;
+		// Dir. name.
+		if (outputDirParameter != null)
+			outputDirName = outputDirParameter.getAbsolutePath();
+		else
+			outputDirName = input.getParent();
+		// File name.
+		int i = input.getName().lastIndexOf(".");
+		if (i != -1)
+			outputFileName = input.getName().substring(0, i);
+		else
+			outputFileName = input.getName();
 		//
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				createAndDumpSwingFrame(outputDir);
-			}
-		});
+		return outputDirName + File.separator + outputFileName + ".png";
 	}
+	
+	// ---------- Arguments methods. ----------
 	
 	private static final String LAF_SWITCH = "--laf";
 	private static final String JG_LAF_SWITCH = "--jg-laf";
 	private static final String NO_EXIST = "--no-exit";
 	private static final String OUTPUT_DIR = "--output-dir";
 	private static boolean exitAfterRender = true;
+	/** Read arguments passed on the command line.   */
 	private static void loadArguments(String[] args) {
 		for (int a = 0; a < args.length; a++) {
 			if (args[a].startsWith("-")) {
@@ -136,7 +101,7 @@ public class SaltCLI {
 						lookAndFeelClass = args[a];
 					}
 				} else if (args[a].equals(JG_LAF_SWITCH)) {
-					lookAndFeelClass = JGOODIES_PLASTIC_LOOKANDFEEL;
+					lookAndFeelClass = SaltProcessor.JGOODIES_PLASTIC_LOOKANDFEEL;
 				} else if (args[a].equals(NO_EXIST)) {
 					exitAfterRender = false;
 				} else if (args[a].equals(OUTPUT_DIR)) {
@@ -154,75 +119,4 @@ public class SaltCLI {
 			}
 		}
 	}
-	
-	private void createAndDumpSwingFrame(File file) {
-
-		// Set JGoodies L&F.
-		try {
-			if (lookAndFeelClass != null) {
-				Class.forName(lookAndFeelClass);
-				Class clazz = Thread.currentThread().getContextClassLoader().loadClass(lookAndFeelClass);
-				LookAndFeel landf = (LookAndFeel)clazz.newInstance();
-				UIManager.setLookAndFeel(landf);
-			}
-		} catch (UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
-			System.err.println("Look&Feel exception.");
-			System.exit(1);
-		} catch (ClassNotFoundException e) {
-			System.err.println("Look&Feel " + lookAndFeelClass + " not found.");
-			System.exit(1);
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-			System.exit(1);
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		SaltSwingVisitor visitor = new SaltSwingVisitor();
-		JFrame frame = (JFrame)visitor.visit(tree);
-		frame.pack();
-		frame.setVisible(true);
-		// Render the component to image.
-		Container componentToRender = frame.getRootPane();
-		BufferedImage image = new BufferedImage(componentToRender.getWidth(), componentToRender.getHeight()
-				, BufferedImage.TYPE_INT_RGB);
-		componentToRender.paint(image.getGraphics());
-		// Write image to file.
-		String inputFilename = inputFile.getName();
-		String outputFilename = inputFilename;
-		int i = inputFilename.lastIndexOf('.');
-		if (i != -1) {
-			outputFilename = inputFilename.substring(0, i);
-		}
-		File outputFile = new File(outputDir.getPath() + File.separatorChar + outputFilename + ".png");
-		try {
-			ImageIO.write(image, "PNG", outputFile);
-			System.out.println("   ... file " + outputFile + " has been generated.");
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			System.out.println("Enable to write to file: " + inputFile);
-			System.exit(1);
-		}
-		toBeCompleted--;
-		if (exitAfterRender && toBeCompleted == 0)
-			System.exit(0);
-	}
-	
-	// Utils.
-	private static String readFileAsString(File file) throws IOException {
-		StringBuffer fileData = new StringBuffer();
-		BufferedReader reader = new BufferedReader(
-				new FileReader(file));
-		char[] buf = new char[1024];
-		int numRead=0;
-		while((numRead=reader.read(buf)) != -1){
-			String readData = String.valueOf(buf, 0, numRead);
-			fileData.append(readData);
-		}
-		reader.close();
-		return fileData.toString();
-	}
-
 }

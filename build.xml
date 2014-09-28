@@ -28,9 +28,10 @@ Build distribution jar salt.jar to be used from command line.
 	<property name="src.dir"        value="${basedir}/src"/>
 	<property name="lib.dir"        value="${basedir}/lib"/>
 	<property name="build.dir"      value="${basedir}/ant-build"/>
-	<property name="dist.dir"        value="${basedir}/dist"/>
-    <property name="jar.file"       value="${dist.dir}/salt9000.jar"/>
-    <property name="complete-jar.file"       value="${dist.dir}/salt9000-complete.jar"/>
+	<property name="releases.dir"        value="${basedir}/releases"/>
+        <property name="version"        value="1.0.0"/>
+    <property name="jar.file"       value="${releases.dir}/salt9000-${version}.jar"/>
+    <property name="complete-jar.file"       value="${releases.dir}/salt9000-${version}-complete.jar"/>
     <property name="main-class"     value="org.mar9000.salt.SaltCLI"/>
 
 	<path id="compile.classpath">
@@ -49,7 +50,7 @@ Build distribution jar salt.jar to be used from command line.
 	</target>
 	
 	<target name="dist" depends="compile">
-		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${releases.dir}"/>
 		<mkdir dir="${build.dir}/lib"/>
 		<copy todir="${build.dir}/lib" flatten="true">
 			<path refid="compile.classpath"/>
