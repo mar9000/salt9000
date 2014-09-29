@@ -77,7 +77,7 @@ public class SaltProcessor {
 	}
 	
 	/** The parse tree.   */
-	private static ParseTree tree = null;
+	private ParseTree tree = null;
 	/** Parse data or input file and initialize the parse tree.   */
 	private void parseInput() {
 		if (data == null)

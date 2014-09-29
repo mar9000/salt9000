@@ -297,16 +297,18 @@ public class SaltSwingVisitor extends AbstractParseTreeVisitor<Container> implem
 	}
 
 	@Override
-	public Container visitButton(ButtonContext ctx) {
+	public JButton visitButton(ButtonContext ctx) {
 		JButton button = new JButton(ctx.text().getText());
 		button.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return button;
 	}
 
 	@Override
-	public Container visitString(StringContext ctx) {
+	public JTextField visitString(StringContext ctx) {
 		String string = ctx.getText();
-		return new JTextField(string.substring(1, string.length()-1));
+		string = string.substring(1, string.length()-1);
+		JTextField field = new JTextField(string, string.length());
+		return field;
 	}
 
 }
