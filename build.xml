@@ -55,42 +55,26 @@ Build distribution jar salt.jar to be used from command line.
 		<copy todir="${build.dir}/lib" flatten="true">
 			<path refid="compile.classpath"/>
 		</copy>
-		
-		<manifestclasspath property="manifest.classpath" jarfile="${jar.file}">
-			<classpath>
-				<pathelement location="."/>
-				<pathelement location="lib/antlr-runtime-4.4.jar"/>
-			</classpath>
-		</manifestclasspath>
-		
+
+		<unzip src="lib/antlr-runtime-4.4.jar" dest= "${build.dir}"/>
+
 		<jar destfile="${jar.file}" basedir="${build.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>
-				<attribute name="Class-Path" value="${manifest.classpath}"/>
 			</manifest>
 		</jar>
 	</target>
 	
 	<target name="dist-complete" description="Add JGoodies LAF to let possible use the --jg-laf switch."
             depends="dist">
-		
-		<copy todir="${build.dir}/lib" flatten="true">
-			<path refid="compile.classpath"/>
-		</copy>
 
-		<manifestclasspath property="manifest.complete-classpath" jarfile="${complete-jar.file}">
-			<classpath>
-				<pathelement location="."/>
-				<pathelement location="lib/antlr-runtime-4.4.jar"/>
-				<pathelement location="lib/jgoodies-common-1.8.0.jar"/>
-				<pathelement location="lib/jgoodies-looks-2.6.0.jar"/>
-			</classpath>
-		</manifestclasspath>
-		
+		<unzip src="lib/antlr-runtime-4.4.jar" dest= "${build.dir}"/>
+		<unzip src="lib/jgoodies-common-1.8.0.jar" dest= "${build.dir}"/>
+		<unzip src="lib/jgoodies-looks-2.6.0.jar" dest= "${build.dir}"/>
+
 		<jar destfile="${complete-jar.file}" basedir="${build.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>
-				<attribute name="Class-Path" value="${manifest.complete-classpath}"/>
 			</manifest>
 		</jar>
 	</target>
